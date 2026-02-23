@@ -1,69 +1,89 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Prestamos Mama</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
+<meta charset="UTF-8">
+<title>Prestamos Mama</title>
 
-        h1 {
-            color: #333;
-        }
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f4f8;
+    padding: 20px;
+}
 
-        .card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+h1 {
+    text-align: center;
+}
 
-        input, select, button {
-            padding: 8px;
-            margin: 5px 0;
-            width: 100%;
-        }
+.container {
+    max-width: 600px;
+    margin: auto;
+}
 
-        button {
-            background-color: #2d89ef;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
 
-        button:hover {
-            background-color: #1b5fbf;
-        }
-    </style>
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #1e40af;
+}
+
+.result {
+    margin-top: 10px;
+}
+</style>
 </head>
+
 <body>
 
-    <h1>App de Préstamos</h1>
+<div class="container">
 
-    <div class="card">
-        <h3>Agregar Cliente</h3>
-        <input type="text" id="nombre" placeholder="Nombre del cliente">
-        <input type="number" id="capital" placeholder="Monto prestado">
-        <select id="tipoPago">
-            <option value="7">Quincenal (7 pagos)</option>
-            <option value="14">Semanal (14 pagos)</option>
-        </select>
-        <button onclick="agregarPrestamo()">Crear Préstamo</button>
-    </div>
+<h1>App de Préstamos</h1>
 
-    <div>
-        <h3>Clientes</h3>
-        <div id="listaClientes"></div>
-    </div>
+<div class="card">
+    <h3>Nuevo Préstamo</h3>
+    <input type="text" id="nombre" placeholder="Nombre del cliente">
+    <input type="number" id="capital" placeholder="Monto prestado">
+    <select id="tipoPago">
+        <option value="7">Quincenal (7 pagos)</option>
+        <option value="14">Semanal (14 pagos)</option>
+    </select>
+    <button onclick="crearPrestamo()">Crear</button>
+</div>
+
+<div>
+    <h3>Préstamos Activos</h3>
+    <div id="lista"></div>
+</div>
+
+</div>
 
 <script>
+
 let prestamos = [];
 
-function agregarPrestamo() {
+function crearPrestamo() {
+
     const nombre = document.getElementById("nombre").value;
     const capital = parseFloat(document.getElementById("capital").value);
     const numeroPagos = parseInt(document.getElementById("tipoPago").value);
@@ -73,37 +93,41 @@ function agregarPrestamo() {
         return;
     }
 
-    const interesTotal = capital * 0.3429;
+    // 40% total en 3 meses
+    const interesTotal = capital * 0.40;
     const total = capital + interesTotal;
     const cuota = total / numeroPagos;
 
     const prestamo = {
-        nombre,
-        capital,
-        total,
-        numeroPagos,
-        cuota: cuota.toFixed(2)
+        nombre: nombre,
+        capital: capital,
+        total: total,
+        numeroPagos: numeroPagos,
+        cuota: cuota
     };
 
     prestamos.push(prestamo);
-    mostrarPrestamos();
+    render();
 }
 
-function mostrarPrestamos() {
-    const lista = document.getElementById("listaClientes");
+function render() {
+
+    const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
     prestamos.forEach(p => {
+
         lista.innerHTML += `
-            <div class="card">
-                <strong>${p.nombre}</strong><br>
-                Capital: $${p.capital}<br>
-                Total con interés: $${p.total.toFixed(2)}<br>
-                Cuota (${p.numeroPagos} pagos): $${p.cuota}
-            </div>
+        <div class="card result">
+            <strong>${p.nombre}</strong><br>
+            Capital: $${p.capital.toFixed(2)}<br>
+            Total con interés (40%): $${p.total.toFixed(2)}<br>
+            ${p.numeroPagos} pagos de: $${p.cuota.toFixed(2)}
+        </div>
         `;
     });
 }
+
 </script>
 
 </body>
