@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prestamos Mama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        button {
+            background-color: #2d89ef;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1b5fbf;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>App de Préstamos</h1>
+
+    <div class="card">
+        <h3>Agregar Cliente</h3>
+        <input type="text" id="nombre" placeholder="Nombre del cliente">
+        <input type="number" id="capital" placeholder="Monto prestado">
+        <select id="tipoPago">
+            <option value="7">Quincenal (7 pagos)</option>
+            <option value="14">Semanal (14 pagos)</option>
+        </select>
+        <button onclick="agregarPrestamo()">Crear Préstamo</button>
+    </div>
+
+    <div>
+        <h3>Clientes</h3>
+        <div id="listaClientes"></div>
+    </div>
+
+<script>
+let prestamos = [];
+
+function agregarPrestamo() {
+    const nombre = document.getElementById("nombre").value;
+    const capital = parseFloat(document.getElementById("capital").value);
+    const numeroPagos = parseInt(document.getElementById("tipoPago").value);
+
+    if (!nombre || !capital) {
+        alert("Completa todos los campos");
+        return;
+    }
+
+    const interesTotal = capital * 0.3429;
+    const total = capital + interesTotal;
+    const cuota = total / numeroPagos;
+
+    const prestamo = {
+        nombre,
+        capital,
+        total,
+        numeroPagos,
+        cuota: cuota.toFixed(2)
+    };
+
+    prestamos.push(prestamo);
+    mostrarPrestamos();
+}
+
+function mostrarPrestamos() {
+    const lista = document.getElementById("listaClientes");
+    lista.innerHTML = "";
+
+    prestamos.forEach(p => {
+        lista.innerHTML += `
+            <div class="card">
+                <strong>${p.nombre}</strong><br>
+                Capital: $${p.capital}<br>
+                Total con interés: $${p.total.toFixed(2)}<br>
+                Cuota (${p.numeroPagos} pagos): $${p.cuota}
+            </div>
+        `;
+    });
+}
+</script>
+
+</body>
+</html>
