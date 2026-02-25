@@ -51,10 +51,22 @@ button {
     cursor: pointer;
 }
 
+button:hover {
+    opacity: 0.9;
+}
+
 .resultado {
     margin-top: 15px;
     font-size: 18px;
     text-align: center;
+}
+
+.prestamo-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 </style>
 </head>
@@ -81,14 +93,26 @@ button {
 
 </div>
 
+<div class="card">
+<h2>Préstamos Activos</h2>
+<div id="listaPrestamos"></div>
+</div>
+
 </div>
 
 <script>
+let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
+
 function calcular() {
 
     const nombre = document.getElementById("nombre").value;
     const monto = parseFloat(document.getElementById("monto").value);
     const pagos = parseInt(document.getElementById("tipo").value);
+
+    if(!nombre){
+        alert("Escribe el nombre del cliente");
+        return;
+    }
 
     if(monto < 2000){
         alert("El monto mínimo es $2,000");
@@ -102,9 +126,64 @@ function calcular() {
     document.getElementById("resultado").innerHTML = `
         <strong>${nombre}</strong><br><br>
         Total a pagar: $${total.toFixed(2)}<br>
-        Pago por cuota: $${cuota.toFixed(2)}
+        Pago por cuota: $${cuota.toFixed(2)}<br><br>
+        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos})">
+            Guardar Préstamo
+        </button>
     `;
 }
+
+function guardar(nombre, monto, total, cuota, pagos){
+
+    const nuevoPrestamo = {
+        nombre,
+        monto,
+        total,
+        cuota,
+        pagos,
+        pagados: 0
+    };
+
+    prestamos.push(nuevoPrestamo);
+    localStorage.setItem("prestamos", JSON.stringify(prestamos));
+
+    document.getElementById("resultado").innerHTML = "";
+    document.getElementById("nombre").value = "";
+    document.getElementById("monto").value = "";
+
+    mostrarPrestamos();
+}
+
+function mostrarPrestamos(){
+
+    let listaHTML = "";
+
+    prestamos.forEach((p, index) => {
+
+        listaHTML += `
+        <div class="prestamo-card">
+            <strong>${p.nombre}</strong><br>
+            Total: $${p.total.toFixed(2)}<br>
+            Cuota: $${p.cuota.toFixed(2)}<br>
+            Pagados: ${p.pagados}/${p.pagos}<br>
+            <button onclick="pagar(${index})">Registrar Pago</button>
+        </div>
+        `;
+    });
+
+    document.getElementById("listaPrestamos").innerHTML = listaHTML;
+}
+
+function pagar(index){
+
+    if(prestamos[index].pagados < prestamos[index].pagos){
+        prestamos[index].pagados++;
+        localStorage.setItem("prestamos", JSON.stringify(prestamos));
+        mostrarPrestamos();
+    }
+}
+
+mostrarPrestamos();
 </script>
 
 </body>
