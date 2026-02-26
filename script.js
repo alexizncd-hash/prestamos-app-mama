@@ -59,6 +59,11 @@ function editar(index){
     document.getElementById("formTitulo").innerText="Editando Préstamo";
 }
 
+function toggleCalendario(index){
+    const el = document.getElementById("cal-"+index);
+    el.classList.toggle("abierto");
+}
+
 function pagar(index){
     if(prestamos[index].pagados < prestamos[index].pagos){
         prestamos[index].pagados++;
@@ -100,7 +105,13 @@ function mostrarPrestamos(){
                 Total: $${p.total.toFixed(2)}<br>
                 Pagados: ${p.pagados}/${p.pagos}
 
-                <div class="calendario">${calendario}</div>
+                <button class="btn-editar" onclick="toggleCalendario(${index})">
+                    Ver Calendario
+                </button>
+
+                <div id="cal-${index}" class="calendario">
+                    ${calendario}
+                </div>
 
                 <button class="btn-pago" onclick="pagar(${index})">Registrar Pago</button>
                 <button class="btn-editar" onclick="editar(${index})">Editar</button>
