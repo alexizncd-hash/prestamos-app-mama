@@ -1,8 +1,8 @@
-alert("JS cargado");
+document.addEventListener("DOMContentLoaded", function(){
+
 let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
 
 const btnGuardar = document.getElementById("btnGuardar");
-
 btnGuardar.addEventListener("click", guardar);
 
 function mostrarMeses(){
@@ -163,3 +163,5 @@ function actualizarTodo(){
 }
 
 actualizarTodo();
+
+});
