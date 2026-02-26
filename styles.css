@@ -1,37 +1,143 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: white;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#ffd6f0,#ffb6e6,#ff8fdc,#ff69b4);
+  margin:0;
+  padding:20px;
+  color:#5a005a;
+  min-height:100vh;
 }
 
-.container {
-  max-width: 400px;
-  margin: auto;
+/* TITULOS */
+
+h1,h2,h3 {
+  text-align:center;
+  color:#b30086;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: none;
+/* CONTENEDORES */
+
+.auth-box, .form-section {
+  background:white;
+  padding:20px;
+  border-radius:25px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.15);
+  margin-bottom:25px;
+  transition: transform 0.2s ease;
 }
+
+.auth-box:hover,
+.form-section:hover {
+  transform: scale(1.02);
+}
+
+/* INPUTS */
+
+input, select {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:15px;
+  border:2px solid #ff69b4;
+  font-size:14px;
+  outline:none;
+}
+
+input:focus, select:focus {
+  border-color:#ff1493;
+  box-shadow:0 0 10px rgba(255,20,147,0.3);
+}
+
+/* BOTONES */
 
 button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #ff4f9a;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:20px;
+  background:#ff1493;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:10px;
+  font-size:14px;
+  transition: all 0.2s ease;
 }
 
+button:hover {
+  background:#ff007f;
+  transform: scale(1.03);
+}
+
+/* HEADER */
+
+header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+/* TARJETAS */
+
+.card {
+  background:white;
+  padding:18px;
+  border-radius:20px;
+  margin-bottom:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* PROGRESS BAR */
+
+.progress {
+  height:10px;
+  background:#ffe0f5;
+  border-radius:20px;
+  margin-top:10px;
+  overflow:hidden;
+}
+
+.progress-bar {
+  height:10px;
+  background:linear-gradient(90deg,#ff1493,#ff69b4);
+  border-radius:20px;
+  transition: width 0.3s ease;
+}
+
+/* CALENDARIO */
+
+.fecha {
+  padding:6px 10px;
+  border-radius:10px;
+  margin:4px 0;
+  font-size:13px;
+  font-weight:500;
+}
+
+/* ESTADOS */
+
+.pagado {
+  background:#c8ffd8;
+  color:#006b2e;
+}
+
+.vencido {
+  background:#ffd0d0;
+  color:#8b0000;
+}
+
+.pendiente {
+  background:#fff0c8;
+  color:#8a6d00;
+}
+
+/* OCULTO */
+
 .hidden {
-  display: none;
+  display:none;
 }
