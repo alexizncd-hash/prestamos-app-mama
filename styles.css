@@ -35,7 +35,10 @@ button {
     border: none;
     font-weight: bold;
     cursor: pointer;
+    transition: 0.2s ease;
 }
+
+button:hover { transform: scale(1.03); }
 
 .btn-calcular { background: #ff6f91; color: white; }
 .btn-editar { background: #17a2b8; color: white; }
@@ -56,15 +59,29 @@ button {
     margin-bottom: 16px;
 }
 
+/* 🔥 CALENDARIO ANIMADO */
+
 .calendario {
     margin-top: 10px;
-    padding: 10px;
+    padding: 0 10px;
     border-radius: 12px;
     background: #fafafa;
     font-size: 14px;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: all 0.4s ease;
 }
 
-.pagado { color: green; font-weight: bold; }
-.vencido { color: red; font-weight: bold; }
-.proximo { color: orange; font-weight: bold; }
+.calendario.abierto {
+    padding: 10px;
+    max-height: 500px;
+    opacity: 1;
+}
+
+/* Estados de pagos */
+
+.pagado { color: #00c853; font-weight: bold; }
+.vencido { color: #ff1744; font-weight: bold; }
+.proximo { color: #ff9800; font-weight: bold; }
 .pendiente { color: gray; }
