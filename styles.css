@@ -7,14 +7,10 @@ body {
   min-height:100vh;
 }
 
-/* TITULOS */
-
 h1,h2,h3 {
   text-align:center;
   color:#b30086;
 }
-
-/* CONTENEDORES */
 
 .auth-box, .form-section {
   background:white;
@@ -22,15 +18,7 @@ h1,h2,h3 {
   border-radius:25px;
   box-shadow:0 15px 35px rgba(0,0,0,0.15);
   margin-bottom:25px;
-  transition: transform 0.2s ease;
 }
-
-.auth-box:hover,
-.form-section:hover {
-  transform: scale(1.02);
-}
-
-/* INPUTS */
 
 input, select {
   width:100%;
@@ -39,15 +27,7 @@ input, select {
   border-radius:15px;
   border:2px solid #ff69b4;
   font-size:14px;
-  outline:none;
 }
-
-input:focus, select:focus {
-  border-color:#ff1493;
-  box-shadow:0 0 10px rgba(255,20,147,0.3);
-}
-
-/* BOTONES */
 
 button {
   width:100%;
@@ -59,22 +39,39 @@ button {
   font-weight:bold;
   cursor:pointer;
   margin-top:10px;
-  font-size:14px;
-  transition: all 0.2s ease;
 }
 
 button:hover {
   background:#ff007f;
-  transform: scale(1.03);
 }
-
-/* HEADER */
 
 header {
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:25px;
+}
+
+/* DASHBOARD */
+
+.dashboard {
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.dash-card {
+  background:white;
+  padding:15px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 8px 25px rgba(0,0,0,0.15);
+}
+
+.dash-card span {
+  font-size:12px;
+  color:#888;
 }
 
 /* TARJETAS */
@@ -85,14 +82,7 @@ header {
   border-radius:20px;
   margin-bottom:20px;
   box-shadow:0 10px 30px rgba(0,0,0,0.15);
-  transition: transform 0.2s ease;
 }
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-/* PROGRESS BAR */
 
 .progress {
   height:10px;
@@ -116,28 +106,10 @@ header {
   border-radius:10px;
   margin:4px 0;
   font-size:13px;
-  font-weight:500;
 }
 
-/* ESTADOS */
+.pagado { background:#c8ffd8; }
+.vencido { background:#ffd0d0; }
+.pendiente { background:#fff0c8; }
 
-.pagado {
-  background:#c8ffd8;
-  color:#006b2e;
-}
-
-.vencido {
-  background:#ffd0d0;
-  color:#8b0000;
-}
-
-.pendiente {
-  background:#fff0c8;
-  color:#8a6d00;
-}
-
-/* OCULTO */
-
-.hidden {
-  display:none;
-}
+.hidden { display:none; }
