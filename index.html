@@ -8,28 +8,77 @@
 </head>
 <body>
 
-<div id="authContainer" class="container">
+<!-- LOGIN -->
+<div id="authContainer" class="auth-box">
   <h2>Acceso</h2>
-  <input type="email" id="email" placeholder="Correo electrónico">
+  <input type="email" id="email" placeholder="Correo">
   <input type="password" id="password" placeholder="Contraseña">
   <button id="btnRegister">Registrarse</button>
   <button id="btnLogin">Iniciar Sesión</button>
 </div>
 
-<div id="appContainer" class="container hidden">
-  <h2>Nuevo Préstamo</h2>
+<!-- APP -->
+<div id="appContainer" class="hidden">
 
-  <input type="text" id="nombre" placeholder="Nombre del cliente">
-  <input type="number" id="monto" placeholder="Monto (mínimo 2000)">
-  <button id="btnGuardar">Guardar Préstamo</button>
+  <header>
+    <h1>Préstamos</h1>
+    <button id="btnLogout">Cerrar sesión</button>
+  </header>
 
-  <button id="btnLogout">Cerrar sesión</button>
+  <!-- DASHBOARD -->
+  <section class="dashboard">
+    <div class="dash-card">
+      <span>Invertido Activo</span>
+      <h3 id="dashInvertido">$0</h3>
+    </div>
+    <div class="dash-card">
+      <span>Recuperado</span>
+      <h3 id="dashRecuperado">$0</h3>
+    </div>
+    <div class="dash-card">
+      <span>Ganancia Proyectada</span>
+      <h3 id="dashGananciaProyectada">$0</h3>
+    </div>
+    <div class="dash-card">
+      <span>Ganancia Real</span>
+      <h3 id="dashGananciaReal">$0</h3>
+    </div>
+  </section>
 
-  <h2>Mis Préstamos</h2>
-  <div id="listaPrestamos"></div>
+  <!-- FORMULARIO -->
+  <section class="form-section">
+    <h3>Nuevo Préstamo</h3>
+
+    <input type="text" id="nombre" placeholder="Nombre cliente">
+    <input type="number" id="monto" placeholder="Monto mínimo 2000">
+    <input type="number" id="interesInput" value="40" placeholder="Interés %">
+
+    <select id="tipo">
+      <option value="quincenal">7 Quincenas</option>
+      <option value="semanal">14 Semanas</option>
+      <option value="mensual">Mensual</option>
+    </select>
+
+    <input type="number" id="meses" placeholder="Meses (solo mensual)">
+    <input type="date" id="fechaInicio">
+
+    <button id="btnGuardar">Guardar Préstamo</button>
+  </section>
+
+  <!-- ACTIVOS -->
+  <section>
+    <h3>Activos</h3>
+    <div id="listaActivos"></div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section>
+    <h3>Historial</h3>
+    <div id="listaHistorial"></div>
+  </section>
+
 </div>
 
 <script type="module" src="script.js"></script>
-
 </body>
 </html>
