@@ -30,29 +30,29 @@ const db = getFirestore(app);
 
 let currentUser = null;
 
-/* ===== ELEMENTOS ===== */
-
+/* ELEMENTOS */
 const authContainer = document.getElementById("authContainer");
 const appContainer = document.getElementById("appContainer");
-
 const btnRegister = document.getElementById("btnRegister");
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
 const btnGuardar = document.getElementById("btnGuardar");
-
 const listaActivos = document.getElementById("listaActivos");
 const listaHistorial = document.getElementById("listaHistorial");
 
-/* ===== LOGIN ===== */
+/* DASHBOARD ELEMENTOS */
+const dashInvertido = document.getElementById("dashInvertido");
+const dashRecuperado = document.getElementById("dashRecuperado");
+const dashGananciaProyectada = document.getElementById("dashGananciaProyectada");
+const dashGananciaReal = document.getElementById("dashGananciaReal");
 
+/* LOGIN */
 btnRegister.onclick = async () => {
   await createUserWithEmailAndPassword(auth,email.value,password.value);
 };
-
 btnLogin.onclick = async () => {
   await signInWithEmailAndPassword(auth,email.value,password.value);
 };
-
 btnLogout.onclick = async () => {
   await signOut(auth);
 };
@@ -69,8 +69,7 @@ onAuthStateChanged(auth, user=>{
   }
 });
 
-/* ===== CREAR PRÉSTAMO ===== */
-
+/* CREAR PRÉSTAMO */
 btnGuardar.onclick = async ()=>{
 
   const nombre = document.getElementById("nombre").value;
@@ -78,7 +77,7 @@ btnGuardar.onclick = async ()=>{
   const porcentaje = parseInt(document.getElementById("interesInput").value) || 40;
   const tipo = document.getElementById("tipo").value;
   const meses = parseInt(document.getElementById("meses").value);
-  const fecha = new Date(document.getElementById("fechaInicio").value);
+  const fechaInicio = new Date(document.getElementById("fechaInicio").value);
 
   if(!nombre || monto < 2000) return;
 
@@ -89,54 +88,55 @@ btnGuardar.onclick = async ()=>{
   if(tipo==="semanal"){ pagos=14; intervalo=7; }
   if(tipo==="mensual"){ pagos=meses; }
 
-  const interes = Math.round(monto * porcentaje / 100);
-  const total = monto + interes;
-  const cuota = Math.round(total / pagos);
+  const interesTotal = Math.round(monto * porcentaje / 100);
+  const totalConInteres = monto + interesTotal;
+  const cuota = Math.round(totalConInteres / pagos);
+
+  let fechas = [];
+  for(let i=1;i<=pagos;i++){
+    let fecha = new Date(fechaInicio);
+    if(tipo==="mensual"){
+      fecha.setMonth(fechaInicio.getMonth()+i);
+    } else {
+      fecha.setDate(fechaInicio.getDate()+(intervalo*i));
+    }
+    fechas.push({
+      fecha: fecha.toISOString(),
+      monto: cuota,
+      estado: "pendiente"
+    });
+  }
 
   await addDoc(collection(db,"users",currentUser.uid,"prestamos"),{
     nombre,
     monto,
     porcentaje,
-    interes,
-    total,
+    interesTotal,
+    totalConInteres,
     cuota,
     pagosTotales:pagos,
     pagosRealizados:0,
+    totalRecuperado:0,
+    gananciaReal:0,
     tipo,
-    intervalo,
-    fechaInicio:fecha,
+    fechaInicio:fechaInicio.toISOString(),
+    fechas,
     estado:"activo"
   });
 
   cargarPrestamos();
 };
 
-/* ===== GENERAR FECHAS ===== */
-
-function generarFechas(p){
-  let fechas=[];
-  let base = new Date(p.fechaInicio);
-
-  for(let i=1;i<=p.pagosTotales;i++){
-    let nueva = new Date(base);
-
-    if(p.tipo==="mensual"){
-      nueva.setMonth(base.getMonth()+i);
-    }else{
-      nueva.setDate(base.getDate()+(p.intervalo*i));
-    }
-
-    fechas.push(nueva);
-  }
-  return fechas;
-}
-
-/* ===== MOSTRAR ===== */
-
+/* CARGAR */
 async function cargarPrestamos(){
 
   listaActivos.innerHTML="";
   listaHistorial.innerHTML="";
+
+  let invertido=0;
+  let recuperado=0;
+  let gananciaProyectada=0;
+  let gananciaReal=0;
 
   const snapshot = await getDocs(collection(db,"users",currentUser.uid,"prestamos"));
 
@@ -144,23 +144,19 @@ async function cargarPrestamos(){
     const p = docSnap.data();
     const id = docSnap.id;
 
+    if(p.estado==="activo") invertido += p.monto;
+    recuperado += p.totalRecuperado;
+    gananciaProyectada += p.interesTotal;
+    gananciaReal += p.gananciaReal;
+
     const progreso = (p.pagosRealizados/p.pagosTotales)*100;
-    const fechas = generarFechas(p);
 
     let calendarioHTML="";
-
-    fechas.forEach((fecha,index)=>{
-      let estado="pendiente";
-
-      if(index < p.pagosRealizados){
-        estado="pagado";
-      }else if(fecha < new Date()){
-        estado="vencido";
-      }
-
-      calendarioHTML+=`
-        <div class="fecha ${estado}">
-          ${index+1}. ${fecha.toLocaleDateString()}
+    p.fechas.forEach((f,index)=>{
+      let clase = f.estado;
+      calendarioHTML += `
+        <div class="fecha ${clase}">
+          ${index+1}. ${new Date(f.fecha).toLocaleDateString()}
         </div>
       `;
     });
@@ -169,14 +165,14 @@ async function cargarPrestamos(){
     card.className="card";
     card.innerHTML=`
       <b>${p.nombre}</b><br>
-      Total: $${p.total}<br>
+      Total: $${p.totalConInteres}<br>
       Cuota: $${p.cuota}<br>
       ${p.pagosRealizados}/${p.pagosTotales}
       <div class="progress">
         <div class="progress-bar" style="width:${progreso}%"></div>
       </div>
       ${calendarioHTML}
-      <button onclick="pagar('${id}',${p.pagosRealizados},${p.pagosTotales})">Registrar Pago</button>
+      <button onclick="registrarPago('${id}')">Registrar Pago</button>
     `;
 
     if(p.estado==="activo"){
@@ -186,12 +182,14 @@ async function cargarPrestamos(){
     }
 
   });
+
+  dashInvertido.textContent="$"+invertido;
+  dashRecuperado.textContent="$"+recuperado;
+  dashGananciaProyectada.textContent="$"+gananciaProyectada;
+  dashGananciaReal.textContent="$"+gananciaReal;
 }
 
-window.pagar = async (id,realizados,totales)=>{
+window.registrarPago = async (id)=>{
   const ref = doc(db,"users",currentUser.uid,"prestamos",id);
-  let nuevo = realizados+1;
-  let estado = nuevo>=totales?"finalizado":"activo";
-  await updateDoc(ref,{pagosRealizados:nuevo,estado});
-  cargarPrestamos();
+  const snapshot = await getDocs(collection(db,"users",currentUser.uid,"prestamos"));
 };
