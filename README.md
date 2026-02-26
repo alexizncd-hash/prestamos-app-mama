@@ -1,2 +1,2 @@
 # prestamos-app-mama
-App web para sistema de prestamos
+App web para sistema de prestamos.
