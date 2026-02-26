@@ -5,271 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Préstamos Mamá</title>
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #1f1f1f;
-    margin: 0;
-    padding: 20px;
-    color: white;
-}
-
-.container {
-    max-width: 420px;
-    margin: auto;
-}
-
-.card {
-    background: #2a2a2a;
-    padding: 20px;
-    border-radius: 18px;
-    margin-bottom: 20px;
-}
-
-h2 {
-    text-align: center;
-}
-
-input, select {
-    width: 100%;
-    padding: 14px;
-    margin-top: 10px;
-    border-radius: 12px;
-    border: none;
-    background: #111;
-    color: white;
-    font-size: 16px;
-}
-
-button {
-    width: 100%;
-    padding: 14px;
-    margin-top: 12px;
-    border: none;
-    border-radius: 14px;
-    background: #5f8f4f;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-button:active {
-    transform: scale(0.98);
-}
-
-.delete-btn {
-    background: #c0392b;
-}
-
-.disabled-btn {
-    background: gray;
-}
-
-.prestamo-card {
-    background: #222;
-    padding: 15px;
-    border-radius: 14px;
-    margin-bottom: 12px;
-}
-
-.atrasado {
-    border-left: 5px solid red;
-}
-
-.proximo {
-    border-left: 5px solid orange;
-}
-
-.normal {
-    border-left: 5px solid #5f8f4f;
-}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
 <div class="container">
 
-<div class="card">
-<h2>Resumen General</h2>
-<div id="dashboard"></div>
+    <div class="card">
+        <h2>Resumen General</h2>
+        <div id="dashboard"></div>
+    </div>
+
+    <div class="card">
+        <h2>Nuevo Préstamo</h2>
+
+        <input type="text" id="nombre" placeholder="Nombre del cliente">
+        <input type="number" id="monto" placeholder="Monto (mínimo $2000)">
+        <input type="date" id="fechaInicio">
+
+        <select id="tipo">
+            <option value="15-7">7 Quincenas</option>
+            <option value="7-14">14 Semanas</option>
+            <option value="30-7">7 Mensual</option>
+        </select>
+
+        <button class="btn-calcular" onclick="calcular()">Calcular</button>
+
+        <div id="resultado"></div>
+    </div>
+
+    <div class="card">
+        <h2>Préstamos</h2>
+        <div id="listaPrestamos"></div>
+    </div>
+
 </div>
 
-<div class="card">
-<h2>Nuevo Préstamo</h2>
-
-<input type="text" id="nombre" placeholder="Nombre del cliente">
-<input type="number" id="monto" placeholder="Monto (mínimo $2000)">
-
-<select id="tipo">
-<option value="15">7 Quincenas</option>
-<option value="7">14 Semanas</option>
-</select>
-
-<button onclick="calcular()">Calcular</button>
-<div id="resultado"></div>
-
-</div>
-
-<div class="card">
-<h2>Préstamos</h2>
-<div id="listaPrestamos"></div>
-</div>
-
-</div>
-
-<script>
-let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
-
-function calcular() {
-
-    const nombre = document.getElementById("nombre").value;
-    const monto = parseFloat(document.getElementById("monto").value);
-    const diasIntervalo = parseInt(document.getElementById("tipo").value);
-
-    if(!nombre){
-        alert("Escribe el nombre del cliente");
-        return;
-    }
-
-    if(monto < 2000){
-        alert("El monto mínimo es $2,000");
-        return;
-    }
-
-    const interes = monto * 0.40;
-    const total = monto + interes;
-    const pagos = diasIntervalo === 15 ? 7 : 14;
-    const cuota = total / pagos;
-
-    const fechaInicio = new Date();
-
-    document.getElementById("resultado").innerHTML = `
-        <br>
-        Total: $${total.toFixed(2)}<br>
-        Cuota: $${cuota.toFixed(2)}<br><br>
-        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos}, ${diasIntervalo})">
-            Guardar Préstamo
-        </button>
-    `;
-}
-
-function guardar(nombre, monto, total, cuota, pagos, diasIntervalo){
-
-    prestamos.push({
-        nombre,
-        monto,
-        total,
-        cuota,
-        pagos,
-        pagados: 0,
-        fechaInicio: new Date().toISOString(),
-        diasIntervalo
-    });
-
-    localStorage.setItem("prestamos", JSON.stringify(prestamos));
-
-    document.getElementById("resultado").innerHTML = "";
-    document.getElementById("nombre").value = "";
-    document.getElementById("monto").value = "";
-
-    actualizarTodo();
-}
-
-function pagar(index){
-    if(prestamos[index].pagados < prestamos[index].pagos){
-        prestamos[index].pagados++;
-        localStorage.setItem("prestamos", JSON.stringify(prestamos));
-        actualizarTodo();
-    }
-}
-
-function eliminar(index){
-    if(confirm("¿Eliminar este préstamo?")){
-        prestamos.splice(index, 1);
-        localStorage.setItem("prestamos", JSON.stringify(prestamos));
-        actualizarTodo();
-    }
-}
-
-function actualizarTodo(){
-    mostrarPrestamos();
-    actualizarDashboard();
-}
-
-function mostrarPrestamos(){
-
-    let html = "";
-    const hoy = new Date();
-
-    prestamos.forEach((p, index) => {
-
-        const fechaInicio = new Date(p.fechaInicio);
-        const proximoPago = new Date(fechaInicio);
-        proximoPago.setDate(fechaInicio.getDate() + (p.pagados + 1) * p.diasIntervalo);
-
-        let clase = "normal";
-
-        if(p.pagados < p.pagos){
-            if(hoy > proximoPago){
-                clase = "atrasado";
-            } else if((proximoPago - hoy) / (1000*60*60*24) <= 3){
-                clase = "proximo";
-            }
-        }
-
-        html += `
-        <div class="prestamo-card ${clase}">
-            <strong>${p.nombre}</strong><br>
-            Total: $${p.total.toFixed(2)}<br>
-            Cuota: $${p.cuota.toFixed(2)}<br>
-            Pagados: ${p.pagados}/${p.pagos}<br>
-            Próximo pago: ${p.pagados < p.pagos ? proximoPago.toLocaleDateString() : "Finalizado"}<br><br>
-
-            ${p.pagados < p.pagos 
-                ? `<button onclick="pagar(${index})">Registrar Pago</button>` 
-                : `<button class="disabled-btn" disabled>Completado</button>`
-            }
-
-            <button class="delete-btn" onclick="eliminar(${index})">Eliminar</button>
-        </div>
-        `;
-    });
-
-    document.getElementById("listaPrestamos").innerHTML = html;
-}
-
-function actualizarDashboard(){
-
-    let totalPrestado = 0;
-    let totalRestante = 0;
-    let atrasados = 0;
-
-    const hoy = new Date();
-
-    prestamos.forEach(p => {
-
-        totalPrestado += p.monto;
-        totalRestante += p.total - (p.cuota * p.pagados);
-
-        const fechaInicio = new Date(p.fechaInicio);
-        const proximoPago = new Date(fechaInicio);
-        proximoPago.setDate(fechaInicio.getDate() + (p.pagados + 1) * p.diasIntervalo);
-
-        if(p.pagados < p.pagos && hoy > proximoPago){
-            atrasados++;
-        }
-    });
-
-    document.getElementById("dashboard").innerHTML = `
-        💵 Total Prestado: $${totalPrestado.toFixed(2)}<br>
-        📥 Total por Cobrar: $${totalRestante.toFixed(2)}<br>
-        🔴 Atrasados: ${atrasados}
-    `;
-}
-
-actualizarTodo();
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
