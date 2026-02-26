@@ -23,15 +23,15 @@
         <input type="number" id="monto" placeholder="Monto (mínimo $2000)">
         <input type="date" id="fechaInicio">
 
-        <select id="tipo" onchange="mostrarMeses()">
+        <select id="tipo">
             <option value="quincenal">7 Quincenas</option>
             <option value="semanal">14 Semanas</option>
             <option value="mensual">Mensual</option>
         </select>
 
-        <input type="number" id="meses" placeholder="Número de meses" style="display:none;">
+        <input type="number" id="meses" placeholder="Número de meses">
 
-        <button id="btnGuardar">Guardar Préstamo</button>
+        <button onclick="guardar()">Guardar Préstamo</button>
     </div>
 
     <div class="card">
@@ -39,13 +39,9 @@
         <div id="listaPrestamos"></div>
     </div>
 
-    <div class="card">
-        <h2>Historial</h2>
-        <div id="historialPrestamos"></div>
-    </div>
-
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
