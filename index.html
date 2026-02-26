@@ -1,61 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Préstamos Mamá</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Préstamos Mamá</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<div class="container">
-
-<h2>Nuevo Préstamo</h2>
-
-<input type="text" id="nombre" placeholder="Nombre del cliente">
-<input type="number" id="monto" placeholder="Monto (mínimo 2000)">
-<input type="date" id="fechaInicio">
-
-<select id="tipo">
-    <option value="quincenal">7 Quincenas</option>
-    <option value="semanal">14 Semanas</option>
-    <option value="mensual">Mensual</option>
-</select>
-
-<input type="number" id="meses" placeholder="Número de meses">
-
-<button onclick="guardar()">Guardar</button>
-
-<hr>
-
-<h2>Lista</h2>
-<div id="lista"></div>
-
+<div id="authContainer" class="container">
+  <h2>Acceso</h2>
+  <input type="email" id="email" placeholder="Correo electrónico">
+  <input type="password" id="password" placeholder="Contraseña">
+  <button id="btnRegister">Registrarse</button>
+  <button id="btnLogin">Iniciar Sesión</button>
 </div>
 
-<script src="script.js"></script>
+<div id="appContainer" class="container hidden">
+  <h2>Nuevo Préstamo</h2>
+
+  <input type="text" id="nombre" placeholder="Nombre del cliente">
+  <input type="number" id="monto" placeholder="Monto (mínimo 2000)">
+  <button id="btnGuardar">Guardar Préstamo</button>
+
+  <button id="btnLogout">Cerrar sesión</button>
+
+  <h2>Mis Préstamos</h2>
+  <div id="listaPrestamos"></div>
+</div>
+
+<script type="module" src="script.js"></script>
+
 </body>
-    <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAr9rN6QcxhzXVmzWhL72mo9Wp9hy80Nwo",
-    authDomain: "prestamos-mama.firebaseapp.com",
-    projectId: "prestamos-mama",
-    storageBucket: "prestamos-mama.appspot.com",
-    messagingSenderId: "983642333442",
-    appId: "1:983642333442:web:bec1d7f198dca61",
-    measurementId: "G-P8MT5E2NCK"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  window.auth = auth;
-  window.db = db;
-</script>
 </html>
