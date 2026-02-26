@@ -43,17 +43,25 @@ input, select {
 button {
     width: 100%;
     padding: 15px;
-    margin-top: 15px;
+    margin-top: 10px;
     border: none;
     border-radius: 12px;
     background: #4CAF50;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
 }
 
 button:hover {
     opacity: 0.9;
+}
+
+.delete-btn {
+    background: #f44336;
+}
+
+.disabled-btn {
+    background: gray;
 }
 
 .resultado {
@@ -90,7 +98,6 @@ button:hover {
 <h2>Nuevo Préstamo</h2>
 
 <input type="text" id="nombre" placeholder="Nombre del cliente">
-
 <input type="number" id="monto" placeholder="Monto (mínimo $2000)">
 
 <select id="tipo">
@@ -99,13 +106,12 @@ button:hover {
 </select>
 
 <button onclick="calcular()">Calcular</button>
-
 <div class="resultado" id="resultado"></div>
 
 </div>
 
 <div class="card">
-<h2>Préstamos Activos</h2>
+<h2>Préstamos</h2>
 <div id="listaPrestamos"></div>
 </div>
 
@@ -166,9 +172,16 @@ function guardar(nombre, monto, total, cuota, pagos){
 }
 
 function pagar(index){
-
     if(prestamos[index].pagados < prestamos[index].pagos){
         prestamos[index].pagados++;
+        localStorage.setItem("prestamos", JSON.stringify(prestamos));
+        actualizarTodo();
+    }
+}
+
+function eliminar(index){
+    if(confirm("¿Seguro que quieres eliminar este préstamo?")){
+        prestamos.splice(index, 1);
         localStorage.setItem("prestamos", JSON.stringify(prestamos));
         actualizarTodo();
     }
@@ -212,10 +225,11 @@ function mostrarPrestamos(){
             Cuota: $${p.cuota.toFixed(2)}<br>
             Pagados: ${p.pagados}/${p.pagos}<br>
             Restante: $${restante.toFixed(2)}<br>
-            ${p.pagados < p.pagos ? 
-                `<button onclick="pagar(${index})">Registrar Pago</button>` 
-                : `<button disabled style="background:gray;">Completado</button>`
+            ${p.pagados < p.pagos 
+                ? `<button onclick="pagar(${index})">Registrar Pago</button>` 
+                : `<button class="disabled-btn" disabled>Completado</button>`
             }
+            <button class="delete-btn" onclick="eliminar(${index})">Eliminar</button>
         </div>
         `;
     });
