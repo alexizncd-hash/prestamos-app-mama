@@ -12,7 +12,8 @@ import {
   addDoc,
   getDocs,
   doc,
-  updateDoc
+  updateDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -40,7 +41,6 @@ const btnGuardar = document.getElementById("btnGuardar");
 const listaActivos = document.getElementById("listaActivos");
 const listaHistorial = document.getElementById("listaHistorial");
 
-/* DASHBOARD ELEMENTOS */
 const dashInvertido = document.getElementById("dashInvertido");
 const dashRecuperado = document.getElementById("dashRecuperado");
 const dashGananciaProyectada = document.getElementById("dashGananciaProyectada");
@@ -127,6 +127,33 @@ btnGuardar.onclick = async ()=>{
   cargarPrestamos();
 };
 
+/* REGISTRAR PAGO */
+window.registrarPago = async (id)=>{
+  const ref = doc(db,"users",currentUser.uid,"prestamos",id);
+  const snap = await getDoc(ref);
+  const p = snap.data();
+
+  if(p.pagosRealizados >= p.pagosTotales) return;
+
+  p.fechas[p.pagosRealizados].estado = "pagado";
+
+  const nuevoRealizados = p.pagosRealizados + 1;
+  const nuevoRecuperado = p.totalRecuperado + p.cuota;
+  const nuevaGanancia = nuevoRecuperado - p.monto;
+
+  const nuevoEstado = nuevoRealizados >= p.pagosTotales ? "finalizado" : "activo";
+
+  await updateDoc(ref,{
+    pagosRealizados:nuevoRealizados,
+    totalRecuperado:nuevoRecuperado,
+    gananciaReal:nuevaGanancia,
+    estado:nuevoEstado,
+    fechas:p.fechas
+  });
+
+  cargarPrestamos();
+};
+
 /* CARGAR */
 async function cargarPrestamos(){
 
@@ -153,9 +180,8 @@ async function cargarPrestamos(){
 
     let calendarioHTML="";
     p.fechas.forEach((f,index)=>{
-      let clase = f.estado;
       calendarioHTML += `
-        <div class="fecha ${clase}">
+        <div class="fecha ${f.estado}">
           ${index+1}. ${new Date(f.fecha).toLocaleDateString()}
         </div>
       `;
@@ -188,8 +214,3 @@ async function cargarPrestamos(){
   dashGananciaProyectada.textContent="$"+gananciaProyectada;
   dashGananciaReal.textContent="$"+gananciaReal;
 }
-
-window.registrarPago = async (id)=>{
-  const ref = doc(db,"users",currentUser.uid,"prestamos",id);
-  const snapshot = await getDocs(collection(db,"users",currentUser.uid,"prestamos"));
-};
