@@ -64,6 +64,7 @@ function guardar(){
     });
 
     localStorage.setItem("prestamos", JSON.stringify(prestamos));
+
     mostrar();
 }
 
@@ -100,10 +101,6 @@ function mostrar(){
 
     prestamos.forEach((p,index)=>{
 
-        const capitalRecuperado = Math.min(p.pagados,5) >= 5 ? p.monto : (p.monto/5) * p.pagados;
-        const gananciaActual = p.pagados > 5 ? (p.pagados - 5) * p.cuota : 0;
-        const capitalPendiente = p.monto - capitalRecuperado;
-
         let calendario = "";
 
         for(let i=1;i<=p.pagos;i++){
@@ -116,8 +113,6 @@ function mostrar(){
                 estado = "Pagado";
             } else if(fecha < hoy){
                 estado = "Vencido";
-            } else if((fecha-hoy)/(1000*60*60*24) <= 3){
-                estado = "Próximo";
             }
 
             calendario += `
@@ -130,21 +125,15 @@ function mostrar(){
         html += `
             <div style="border:1px solid #ccc; padding:15px; margin:15px 0;">
                 <strong>${p.nombre}</strong><br>
-                Tipo: ${p.tipoTexto}<br><br>
-
-                Monto prestado: $${p.monto}<br>
+                Tipo: ${p.tipoTexto}<br>
+                Monto: $${p.monto}<br>
                 Interés 40%: $${p.interes}<br>
-                Total a cobrar: $${p.total}<br>
-                Cuota: $${p.cuota}<br><br>
+                Total: $${p.total}<br>
+                Cuota: $${p.cuota}<br>
+                Pagados: ${p.pagados}/${p.pagos}<br><br>
 
-                Pagados: ${p.pagados}/${p.pagos}<br>
-                Capital recuperado: $${Math.round(capitalRecuperado)}<br>
-                Capital pendiente: $${Math.round(capitalPendiente)}<br>
-                Ganancia real actual: $${gananciaActual}<br><br>
+                ${calendario}<br>
 
-                <strong>Calendario:</strong><br>
-                ${calendario}
-                <br>
                 <button onclick="pagar(${index})">Registrar Pago</button>
                 <button onclick="eliminar(${index})">Eliminar</button>
             </div>
