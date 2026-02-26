@@ -1,43 +1,62 @@
 let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
+let editando = null;
 
-function calcular() {
+function mostrarMeses(){
+    const tipo = document.getElementById("tipo").value;
+    document.getElementById("meses").style.display =
+        tipo === "mensual" ? "block" : "none";
+}
+
+function guardar(){
 
     const nombre = document.getElementById("nombre").value;
     const monto = parseFloat(document.getElementById("monto").value);
-    const fechaInput = document.getElementById("fechaInicio").value;
-    const tipo = document.getElementById("tipo").value.split("-");
-    const diasIntervalo = parseInt(tipo[0]);
-    const pagos = parseInt(tipo[1]);
+    const fechaInicio = new Date(document.getElementById("fechaInicio").value);
+    const tipo = document.getElementById("tipo").value;
+    let pagos, intervalo;
 
-    if(!nombre || monto < 2000){
-        alert("Datos inválidos");
-        return;
+    if(!nombre || monto < 2000) return alert("Datos inválidos");
+
+    if(tipo === "quincenal"){ pagos = 7; intervalo = 15; }
+    if(tipo === "semanal"){ pagos = 14; intervalo = 7; }
+    if(tipo === "mensual"){
+        pagos = parseInt(document.getElementById("meses").value);
+        if(!pagos || pagos < 1) return alert("Meses inválidos");
+        intervalo = 30;
     }
 
-    const interes = monto * 0.40;
-    const total = monto + interes;
+    const total = monto * 1.40;
     const cuota = total / pagos;
-    const fechaInicio = fechaInput ? new Date(fechaInput) : new Date();
 
-    document.getElementById("resultado").innerHTML = `
-        <br>
-        Total: $${total.toFixed(2)}<br>
-        Cuota: $${cuota.toFixed(2)}<br><br>
-        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos}, ${diasIntervalo}, '${fechaInicio.toISOString()}')">
-            Guardar Préstamo
-        </button>
-    `;
-}
+    const data = {nombre, monto, total, cuota, pagos, pagados:0, intervalo, fechaInicio};
 
-function guardar(nombre, monto, total, cuota, pagos, diasIntervalo, fechaInicio){
-    prestamos.push({nombre, monto, total, cuota, pagos, pagados:0, diasIntervalo, fechaInicio});
+    if(editando !== null){
+        prestamos[editando] = data;
+        editando = null;
+        document.getElementById("formTitulo").innerText = "Nuevo Préstamo";
+    } else {
+        prestamos.push(data);
+    }
+
     localStorage.setItem("prestamos", JSON.stringify(prestamos));
+    limpiar();
     actualizarTodo();
 }
 
-function toggleCalendario(index){
-    const el = document.getElementById("cal-"+index);
-    el.style.display = el.style.display === "none" ? "block" : "none";
+function limpiar(){
+    document.getElementById("nombre").value="";
+    document.getElementById("monto").value="";
+    document.getElementById("fechaInicio").value="";
+    document.getElementById("meses").value="";
+}
+
+function editar(index){
+    const p = prestamos[index];
+    document.getElementById("nombre").value=p.nombre;
+    document.getElementById("monto").value=p.monto;
+    document.getElementById("fechaInicio").value=new Date(p.fechaInicio).toISOString().split("T")[0];
+    editando=index;
+    document.getElementById("formTitulo").innerText="Editando Préstamo";
 }
 
 function pagar(index){
@@ -49,56 +68,67 @@ function pagar(index){
 }
 
 function eliminar(index){
-    if(confirm("¿Eliminar préstamo?")){
-        prestamos.splice(index,1);
-        localStorage.setItem("prestamos", JSON.stringify(prestamos));
-        actualizarTodo();
-    }
+    prestamos.splice(index,1);
+    localStorage.setItem("prestamos", JSON.stringify(prestamos));
+    actualizarTodo();
 }
 
 function mostrarPrestamos(){
-    let html="";
+    let activos="", historial="";
     const hoy = new Date();
 
     prestamos.forEach((p,index)=>{
-        const fechaInicio = new Date(p.fechaInicio);
-        let clase="normal";
-
-        const proximo = new Date(fechaInicio);
-        proximo.setDate(fechaInicio.getDate() + (p.pagados+1)*p.diasIntervalo);
-
-        if(hoy > proximo && p.pagados < p.pagos) clase="atrasado";
-        else if((proximo-hoy)/(1000*60*60*24)<=3 && p.pagados<p.pagos) clase="proximo";
-
         let calendario="";
         for(let i=1;i<=p.pagos;i++){
-            let fecha=new Date(fechaInicio);
-            fecha.setDate(fechaInicio.getDate()+i*p.diasIntervalo);
-            calendario+=`${i}. ${fecha.toLocaleDateString()} - ${i<=p.pagados?"Pagado":"Pendiente"}<br>`;
+            let fecha=new Date(p.fechaInicio);
+            fecha.setDate(fecha.getDate()+i*p.intervalo);
+
+            let estado="pendiente";
+            if(i<=p.pagados) estado="pagado";
+            else if(fecha < hoy) estado="vencido";
+            else if((fecha-hoy)/(1000*60*60*24)<=3) estado="proximo";
+
+            calendario+=`<div class="${estado}">
+                ${i}. ${fecha.toLocaleDateString()}
+            </div>`;
         }
 
-        html+=`
-        <div class="prestamo-card ${clase}">
-        <strong>${p.nombre}</strong><br>
-        Total: $${p.total.toFixed(2)}<br>
-        Pagados: ${p.pagados}/${p.pagos}<br>
+        if(p.pagados < p.pagos){
+            activos+=`
+            <div class="prestamo-card">
+                <strong>${p.nombre}</strong><br>
+                Total: $${p.total.toFixed(2)}<br>
+                Pagados: ${p.pagados}/${p.pagos}
 
-        <button class="btn-toggle" onclick="toggleCalendario(${index})">Ver Calendario</button>
-        <div id="cal-${index}" class="calendario">${calendario}</div>
+                <div class="calendario">${calendario}</div>
 
-        <button class="btn-pago" onclick="pagar(${index})">Registrar Pago</button>
-        <button class="btn-eliminar" onclick="eliminar(${index})">Eliminar</button>
-        </div>
-        `;
+                <button class="btn-pago" onclick="pagar(${index})">Registrar Pago</button>
+                <button class="btn-editar" onclick="editar(${index})">Editar</button>
+                <button class="btn-eliminar" onclick="eliminar(${index})">Eliminar</button>
+            </div>`;
+        } else {
+            historial+=`
+            <div class="historial-card">
+                <strong>${p.nombre}</strong><br>
+                Finalizado - $${p.total.toFixed(2)}
+            </div>`;
+        }
     });
 
-    document.getElementById("listaPrestamos").innerHTML=html;
+    document.getElementById("listaPrestamos").innerHTML=activos;
+    document.getElementById("historialPrestamos").innerHTML=historial;
 }
 
 function actualizarDashboard(){
-    let totalPrestado=0;
-    prestamos.forEach(p=> totalPrestado+=p.monto);
-    document.getElementById("dashboard").innerHTML=`💵 Total Prestado: $${totalPrestado.toFixed(2)}`;
+    let totalPrestado=0, totalRestante=0;
+    prestamos.forEach(p=>{
+        totalPrestado+=p.monto;
+        totalRestante+=p.total - (p.cuota*p.pagados);
+    });
+
+    document.getElementById("dashboard").innerHTML=
+        `💵 Prestado: $${totalPrestado.toFixed(2)}<br>
+         📥 Por cobrar: $${totalRestante.toFixed(2)}`;
 }
 
 function actualizarTodo(){
