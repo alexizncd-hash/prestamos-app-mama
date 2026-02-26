@@ -1,3 +1,4 @@
+alert("VERSION NUEVA ACTIVA");
 let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
 
 function guardar(){
