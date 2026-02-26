@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Préstamos Mamá</title>
-
 <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -18,31 +17,35 @@
     </div>
 
     <div class="card">
-        <h2>Nuevo Préstamo</h2>
+        <h2 id="formTitulo">Nuevo Préstamo</h2>
 
         <input type="text" id="nombre" placeholder="Nombre del cliente">
         <input type="number" id="monto" placeholder="Monto (mínimo $2000)">
         <input type="date" id="fechaInicio">
 
-        <select id="tipo">
-            <option value="15-7">7 Quincenas</option>
-            <option value="7-14">14 Semanas</option>
-            <option value="30-7">7 Mensual</option>
+        <select id="tipo" onchange="mostrarMeses()">
+            <option value="quincenal">7 Quincenas</option>
+            <option value="semanal">14 Semanas</option>
+            <option value="mensual">Mensual</option>
         </select>
 
-        <button class="btn-calcular" onclick="calcular()">Calcular</button>
+        <input type="number" id="meses" placeholder="Número de meses" style="display:none;">
 
-        <div id="resultado"></div>
+        <button class="btn-calcular" onclick="guardar()">Guardar</button>
     </div>
 
     <div class="card">
-        <h2>Préstamos</h2>
+        <h2>Activos</h2>
         <div id="listaPrestamos"></div>
+    </div>
+
+    <div class="card">
+        <h2>Historial</h2>
+        <div id="historialPrestamos"></div>
     </div>
 
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
