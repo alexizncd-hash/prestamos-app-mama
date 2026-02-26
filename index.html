@@ -28,6 +28,7 @@ body {
 
 h2 {
     text-align: center;
+    margin-top: 0;
 }
 
 input, select {
@@ -68,12 +69,22 @@ button:hover {
     margin-bottom: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
+
+.dashboard-item {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
+
+<div class="card">
+<h2>Resumen General</h2>
+<div id="dashboard"></div>
+</div>
 
 <div class="card">
 <h2>Nuevo Préstamo</h2>
@@ -151,7 +162,21 @@ function guardar(nombre, monto, total, cuota, pagos){
     document.getElementById("nombre").value = "";
     document.getElementById("monto").value = "";
 
+    actualizarTodo();
+}
+
+function pagar(index){
+
+    if(prestamos[index].pagados < prestamos[index].pagos){
+        prestamos[index].pagados++;
+        localStorage.setItem("prestamos", JSON.stringify(prestamos));
+        actualizarTodo();
+    }
+}
+
+function actualizarTodo(){
     mostrarPrestamos();
+    actualizarDashboard();
 }
 
 function mostrarPrestamos(){
@@ -160,13 +185,37 @@ function mostrarPrestamos(){
 
     prestamos.forEach((p, index) => {
 
+        let estadoColor = "#2196F3";
+        let estadoTexto = "Activo";
+
+        const faltan = p.pagos - p.pagados;
+        const restante = p.total - (p.cuota * p.pagados);
+
+        if(p.pagados === p.pagos){
+            estadoColor = "#4CAF50";
+            estadoTexto = "Terminado";
+        }
+        else if(faltan === 1){
+            estadoColor = "#f44336";
+            estadoTexto = "Último pago";
+        }
+        else if(faltan <= 2){
+            estadoColor = "#FFC107";
+            estadoTexto = "Por terminar";
+        }
+
         listaHTML += `
-        <div class="prestamo-card">
+        <div class="prestamo-card" style="border-left:6px solid ${estadoColor}">
             <strong>${p.nombre}</strong><br>
+            Estado: <strong>${estadoTexto}</strong><br>
             Total: $${p.total.toFixed(2)}<br>
             Cuota: $${p.cuota.toFixed(2)}<br>
             Pagados: ${p.pagados}/${p.pagos}<br>
-            <button onclick="pagar(${index})">Registrar Pago</button>
+            Restante: $${restante.toFixed(2)}<br>
+            ${p.pagados < p.pagos ? 
+                `<button onclick="pagar(${index})">Registrar Pago</button>` 
+                : `<button disabled style="background:gray;">Completado</button>`
+            }
         </div>
         `;
     });
@@ -174,16 +223,33 @@ function mostrarPrestamos(){
     document.getElementById("listaPrestamos").innerHTML = listaHTML;
 }
 
-function pagar(index){
+function actualizarDashboard(){
 
-    if(prestamos[index].pagados < prestamos[index].pagos){
-        prestamos[index].pagados++;
-        localStorage.setItem("prestamos", JSON.stringify(prestamos));
-        mostrarPrestamos();
-    }
+    let totalPrestado = 0;
+    let totalRestante = 0;
+    let activos = 0;
+    let terminados = 0;
+
+    prestamos.forEach(p => {
+        totalPrestado += p.monto;
+        totalRestante += p.total - (p.cuota * p.pagados);
+
+        if(p.pagados === p.pagos){
+            terminados++;
+        } else {
+            activos++;
+        }
+    });
+
+    document.getElementById("dashboard").innerHTML = `
+        <div class="dashboard-item">💵 Total Prestado: $${totalPrestado.toFixed(2)}</div>
+        <div class="dashboard-item">📥 Total por Cobrar: $${totalRestante.toFixed(2)}</div>
+        <div class="dashboard-item">📄 Activos: ${activos}</div>
+        <div class="dashboard-item">✅ Terminados: ${terminados}</div>
+    `;
 }
 
-mostrarPrestamos();
+actualizarTodo();
 </script>
 
 </body>
