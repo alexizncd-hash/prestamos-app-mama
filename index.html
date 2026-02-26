@@ -8,9 +8,10 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-    background: #f4f6f9;
+    background: #1f1f1f;
     margin: 0;
     padding: 20px;
+    color: white;
 }
 
 .container {
@@ -19,16 +20,14 @@ body {
 }
 
 .card {
-    background: white;
+    background: #2a2a2a;
     padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    border-radius: 18px;
     margin-bottom: 20px;
 }
 
 h2 {
     text-align: center;
-    margin-top: 0;
 }
 
 input, select {
@@ -36,7 +35,9 @@ input, select {
     padding: 14px;
     margin-top: 10px;
     border-radius: 12px;
-    border: 1px solid #ddd;
+    border: none;
+    background: #111;
+    color: white;
     font-size: 16px;
 }
 
@@ -46,7 +47,7 @@ button {
     margin-top: 12px;
     border: none;
     border-radius: 14px;
-    background: #4CAF50;
+    background: #5f8f4f;
     color: white;
     font-size: 16px;
     cursor: pointer;
@@ -57,39 +58,30 @@ button:active {
 }
 
 .delete-btn {
-    background: #f44336;
+    background: #c0392b;
 }
 
 .disabled-btn {
     background: gray;
 }
 
-.resultado {
-    margin-top: 15px;
-    font-size: 17px;
-    text-align: center;
-}
-
 .prestamo-card {
+    background: #222;
     padding: 15px;
     border-radius: 14px;
     margin-bottom: 12px;
-    background: #ffffff;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
 }
 
-.progress-bar {
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 5px;
-    margin-top: 8px;
-    overflow: hidden;
+.atrasado {
+    border-left: 5px solid red;
 }
 
-.progress {
-    height: 6px;
-    background: #4CAF50;
-    transition: width 0.3s ease;
+.proximo {
+    border-left: 5px solid orange;
+}
+
+.normal {
+    border-left: 5px solid #5f8f4f;
 }
 </style>
 </head>
@@ -110,12 +102,13 @@ button:active {
 <input type="number" id="monto" placeholder="Monto (mínimo $2000)">
 
 <select id="tipo">
-<option value="7">7 Quincenas</option>
-<option value="14">14 Semanas</option>
+<option value="15">7 Quincenas</option>
+<option value="7">14 Semanas</option>
 </select>
 
 <button onclick="calcular()">Calcular</button>
-<div class="resultado" id="resultado"></div>
+<div id="resultado"></div>
+
 </div>
 
 <div class="card">
@@ -132,7 +125,7 @@ function calcular() {
 
     const nombre = document.getElementById("nombre").value;
     const monto = parseFloat(document.getElementById("monto").value);
-    const pagos = parseInt(document.getElementById("tipo").value);
+    const diasIntervalo = parseInt(document.getElementById("tipo").value);
 
     if(!nombre){
         alert("Escribe el nombre del cliente");
@@ -146,19 +139,22 @@ function calcular() {
 
     const interes = monto * 0.40;
     const total = monto + interes;
+    const pagos = diasIntervalo === 15 ? 7 : 14;
     const cuota = total / pagos;
 
+    const fechaInicio = new Date();
+
     document.getElementById("resultado").innerHTML = `
-        <strong>${nombre}</strong><br><br>
+        <br>
         Total: $${total.toFixed(2)}<br>
         Cuota: $${cuota.toFixed(2)}<br><br>
-        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos})">
+        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos}, ${diasIntervalo})">
             Guardar Préstamo
         </button>
     `;
 }
 
-function guardar(nombre, monto, total, cuota, pagos){
+function guardar(nombre, monto, total, cuota, pagos, diasIntervalo){
 
     prestamos.push({
         nombre,
@@ -166,7 +162,9 @@ function guardar(nombre, monto, total, cuota, pagos){
         total,
         cuota,
         pagos,
-        pagados: 0
+        pagados: 0,
+        fechaInicio: new Date().toISOString(),
+        diasIntervalo
     });
 
     localStorage.setItem("prestamos", JSON.stringify(prestamos));
@@ -202,22 +200,31 @@ function actualizarTodo(){
 function mostrarPrestamos(){
 
     let html = "";
+    const hoy = new Date();
 
     prestamos.forEach((p, index) => {
 
-        const progreso = (p.pagados / p.pagos) * 100;
-        const restante = p.total - (p.cuota * p.pagados);
+        const fechaInicio = new Date(p.fechaInicio);
+        const proximoPago = new Date(fechaInicio);
+        proximoPago.setDate(fechaInicio.getDate() + (p.pagados + 1) * p.diasIntervalo);
+
+        let clase = "normal";
+
+        if(p.pagados < p.pagos){
+            if(hoy > proximoPago){
+                clase = "atrasado";
+            } else if((proximoPago - hoy) / (1000*60*60*24) <= 3){
+                clase = "proximo";
+            }
+        }
 
         html += `
-        <div class="prestamo-card">
+        <div class="prestamo-card ${clase}">
             <strong>${p.nombre}</strong><br>
             Total: $${p.total.toFixed(2)}<br>
+            Cuota: $${p.cuota.toFixed(2)}<br>
             Pagados: ${p.pagados}/${p.pagos}<br>
-            Restante: $${restante.toFixed(2)}
-
-            <div class="progress-bar">
-                <div class="progress" style="width:${progreso}%"></div>
-            </div>
+            Próximo pago: ${p.pagados < p.pagos ? proximoPago.toLocaleDateString() : "Finalizado"}<br><br>
 
             ${p.pagados < p.pagos 
                 ? `<button onclick="pagar(${index})">Registrar Pago</button>` 
@@ -236,15 +243,28 @@ function actualizarDashboard(){
 
     let totalPrestado = 0;
     let totalRestante = 0;
+    let atrasados = 0;
+
+    const hoy = new Date();
 
     prestamos.forEach(p => {
+
         totalPrestado += p.monto;
         totalRestante += p.total - (p.cuota * p.pagados);
+
+        const fechaInicio = new Date(p.fechaInicio);
+        const proximoPago = new Date(fechaInicio);
+        proximoPago.setDate(fechaInicio.getDate() + (p.pagados + 1) * p.diasIntervalo);
+
+        if(p.pagados < p.pagos && hoy > proximoPago){
+            atrasados++;
+        }
     });
 
     document.getElementById("dashboard").innerHTML = `
         💵 Total Prestado: $${totalPrestado.toFixed(2)}<br>
-        📥 Total por Cobrar: $${totalRestante.toFixed(2)}
+        📥 Total por Cobrar: $${totalRestante.toFixed(2)}<br>
+        🔴 Atrasados: ${atrasados}
     `;
 }
 
