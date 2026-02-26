@@ -1,6 +1,6 @@
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa, #e4ecf5);
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #f8c8dc, #ffd6ec);
     margin: 0;
     padding: 20px;
 }
@@ -12,79 +12,115 @@ body {
 
 .card {
     background: white;
-    padding: 20px;
-    border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    margin-bottom: 20px;
-    transition: 0.2s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
+    padding: 22px;
+    border-radius: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 22px rgba(214, 51, 132, 0.15);
+    border: 3px solid #ffe3f3;
 }
 
 h2 {
     text-align: center;
-    margin-top: 0;
+    color: #d63384;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 input, select {
     width: 100%;
     padding: 14px;
     margin-top: 10px;
-    border-radius: 12px;
-    border: 1px solid #dcdcdc;
+    border-radius: 16px;
+    border: 2px solid #ffb3d9;
     font-size: 16px;
+    background: #fff5fb;
 }
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #ff6f91;
+    box-shadow: 0 0 8px rgba(255, 111, 145, 0.4);
+}
+
+/* BOTONES */
 
 button {
     width: 100%;
     padding: 14px;
     margin-top: 12px;
     border: none;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #4CAF50, #43a047);
-    color: white;
+    border-radius: 25px;
     font-size: 16px;
     cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s ease;
 }
 
-button:active {
-    transform: scale(0.97);
+button:hover {
+    transform: scale(1.03);
 }
 
-.delete-btn {
-    background: linear-gradient(135deg, #f44336, #d32f2f);
+/* Botón principal rosa coral */
+.btn-calcular {
+    background: linear-gradient(135deg, #ff6f91, #ff9671);
+    color: white;
 }
 
-.disabled-btn {
-    background: gray;
+/* Verde brillante */
+.btn-pago {
+    background: linear-gradient(135deg, #00c853, #69f0ae);
+    color: white;
 }
 
-.resultado {
-    margin-top: 15px;
-    font-size: 17px;
-    text-align: center;
+/* Rojo intenso */
+.btn-eliminar {
+    background: linear-gradient(135deg, #ff1744, #ff616f);
+    color: white;
 }
+
+/* Amarillo dorado */
+.btn-toggle {
+    background: linear-gradient(135deg, #ffc107, #ffd54f);
+    color: black;
+}
+
+/* TARJETAS DE PRÉSTAMOS */
 
 .prestamo-card {
-    padding: 15px;
+    background: #fff0f8;
+    padding: 16px;
+    border-radius: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    border: 2px solid #ffd6ec;
+}
+
+/* Estados */
+
+.atrasado {
+    border-left: 8px solid #ff1744;
+    background: #ffe5eb;
+}
+
+.proximo {
+    border-left: 8px solid #ffc107;
+    background: #fff8e1;
+}
+
+.normal {
+    border-left: 8px solid #00c853;
+}
+
+/* Calendario desplegable */
+
+.calendario {
+    margin-top: 12px;
+    background: linear-gradient(135deg, #e1bee7, #f8bbd0);
+    padding: 12px;
     border-radius: 14px;
-    margin-bottom: 12px;
-    background: #ffffff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-}
-
-.progress-bar {
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 5px;
-    margin-top: 8px;
-    overflow: hidden;
-}
-
-.progress {
-    height: 6px;
-    background: #4CAF50;
-    transition: width 0.4s ease;
+    display: none;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4a148c;
+    border: 2px solid #ce93d8;
 }
