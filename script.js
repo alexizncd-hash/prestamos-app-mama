@@ -1,3 +1,4 @@
+alert("JS cargado");
 let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
 
 const btnGuardar = document.getElementById("btnGuardar");
