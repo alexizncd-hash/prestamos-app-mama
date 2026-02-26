@@ -1,10 +1,9 @@
-alert("VERSION NUEVA ACTIVA");
 let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
 
 function guardar(){
 
     const nombre = document.getElementById("nombre").value.trim();
-    const monto = parseFloat(document.getElementById("monto").value);
+    const monto = parseInt(document.getElementById("monto").value);
     const fechaInput = document.getElementById("fechaInicio").value;
     const tipo = document.getElementById("tipo").value;
     const mesesInput = document.getElementById("meses").value;
@@ -26,13 +25,13 @@ function guardar(){
     if(tipo === "quincenal"){
         pagos = 7;
         intervalo = 15;
-        tipoTexto = "Quincenal";
+        tipoTexto = "Quincenal (7 pagos)";
     }
 
     if(tipo === "semanal"){
         pagos = 14;
         intervalo = 7;
-        tipoTexto = "Semanal";
+        tipoTexto = "Semanal (14 pagos)";
     }
 
     if(tipo === "mensual"){
@@ -42,14 +41,14 @@ function guardar(){
             return;
         }
         intervalo = "mensual";
-        tipoTexto = "Mensual";
+        tipoTexto = "Mensual (" + pagos + " meses)";
     }
 
     const fechaInicio = fechaInput ? new Date(fechaInput) : new Date();
 
     const interes = monto * 0.40;
     const total = monto + interes;
-    const cuota = total / pagos;
+    const cuota = Math.round(total / pagos);
 
     prestamos.push({
         nombre,
@@ -68,13 +67,13 @@ function guardar(){
     mostrar();
 }
 
-function calcularFecha(fechaBase, intervalo, numeroPago){
-    let fecha = new Date(fechaBase);
+function calcularFecha(base, intervalo, numero){
+    let fecha = new Date(base);
 
     if(intervalo === "mensual"){
-        fecha.setMonth(fecha.getMonth() + numeroPago);
+        fecha.setMonth(fecha.getMonth() + numero);
     } else {
-        fecha.setDate(fecha.getDate() + (numeroPago * intervalo));
+        fecha.setDate(fecha.getDate() + numero * intervalo);
     }
 
     return fecha;
@@ -101,39 +100,49 @@ function mostrar(){
 
     prestamos.forEach((p,index)=>{
 
+        const capitalRecuperado = Math.min(p.pagados,5) >= 5 ? p.monto : (p.monto/5) * p.pagados;
+        const gananciaActual = p.pagados > 5 ? (p.pagados - 5) * p.cuota : 0;
+        const capitalPendiente = p.monto - capitalRecuperado;
+
         let calendario = "";
 
         for(let i=1;i<=p.pagos;i++){
 
-            const fechaPago = calcularFecha(p.fechaInicio, p.intervalo, i);
+            const fecha = calcularFecha(p.fechaInicio, p.intervalo, i);
 
             let estado = "Pendiente";
 
             if(i <= p.pagados){
                 estado = "Pagado";
-            } else if(fechaPago < hoy){
+            } else if(fecha < hoy){
                 estado = "Vencido";
-            } else if((fechaPago - hoy)/(1000*60*60*24) <= 3){
+            } else if((fecha-hoy)/(1000*60*60*24) <= 3){
                 estado = "Próximo";
             }
 
             calendario += `
                 <div>
-                    ${i}. ${fechaPago.toLocaleDateString()} - ${estado}
+                    ${i}. ${fecha.toLocaleDateString()} - ${estado}
                 </div>
             `;
         }
 
         html += `
-            <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <div style="border:1px solid #ccc; padding:15px; margin:15px 0;">
                 <strong>${p.nombre}</strong><br>
-                Tipo: ${p.tipoTexto}<br>
-                Monto: $${p.monto.toFixed(2)}<br>
-                Interés (40%): $${p.interes.toFixed(2)}<br>
-                Total a cobrar: $${p.total.toFixed(2)}<br>
-                Cuota: $${p.cuota.toFixed(2)}<br>
+                Tipo: ${p.tipoTexto}<br><br>
+
+                Monto prestado: $${p.monto}<br>
+                Interés 40%: $${p.interes}<br>
+                Total a cobrar: $${p.total}<br>
+                Cuota: $${p.cuota}<br><br>
+
                 Pagados: ${p.pagados}/${p.pagos}<br>
-                <br>
+                Capital recuperado: $${Math.round(capitalRecuperado)}<br>
+                Capital pendiente: $${Math.round(capitalPendiente)}<br>
+                Ganancia real actual: $${gananciaActual}<br><br>
+
+                <strong>Calendario:</strong><br>
                 ${calendario}
                 <br>
                 <button onclick="pagar(${index})">Registrar Pago</button>
