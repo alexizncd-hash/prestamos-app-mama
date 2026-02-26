@@ -1,146 +1,136 @@
-let prestamos = JSON.parse(localStorage.getItem("prestamos")) || [];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { 
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function guardar(){
+/* ========= PEGA TU CONFIG ========= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAr9rN6QcxhzXVmzWhL72mo9Wp9hy80Nwo",
+  authDomain: "prestamos-mama.firebaseapp.com",
+  projectId: "prestamos-mama",
+  storageBucket: "prestamos-mama.appspot.com",
+  messagingSenderId: "983642333442",
+  appId: "1:983642333442:web:bec1d7f198dca61"
+};
+/* =================================== */
 
-    const nombre = document.getElementById("nombre").value.trim();
-    const monto = parseInt(document.getElementById("monto").value);
-    const fechaInput = document.getElementById("fechaInicio").value;
-    const tipo = document.getElementById("tipo").value;
-    const mesesInput = document.getElementById("meses").value;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    if(!nombre){
-        alert("Ingresa nombre");
-        return;
-    }
+let currentUser = null;
 
-    if(!monto || monto < 2000){
-        alert("Monto mínimo 2000");
-        return;
-    }
+/* ===== ELEMENTOS ===== */
 
-    let pagos = 0;
-    let intervalo = 0;
-    let tipoTexto = "";
+const authContainer = document.getElementById("authContainer");
+const appContainer = document.getElementById("appContainer");
 
-    if(tipo === "quincenal"){
-        pagos = 7;
-        intervalo = 15;
-        tipoTexto = "Quincenal (7 pagos)";
-    }
+const btnRegister = document.getElementById("btnRegister");
+const btnLogin = document.getElementById("btnLogin");
+const btnLogout = document.getElementById("btnLogout");
+const btnGuardar = document.getElementById("btnGuardar");
 
-    if(tipo === "semanal"){
-        pagos = 14;
-        intervalo = 7;
-        tipoTexto = "Semanal (14 pagos)";
-    }
+const lista = document.getElementById("listaPrestamos");
 
-    if(tipo === "mensual"){
-        pagos = parseInt(mesesInput);
-        if(!pagos || pagos < 1){
-            alert("Meses inválidos");
-            return;
-        }
-        intervalo = "mensual";
-        tipoTexto = "Mensual (" + pagos + " meses)";
-    }
+/* ===== REGISTRO ===== */
 
-    const fechaInicio = fechaInput ? new Date(fechaInput) : new Date();
+btnRegister.addEventListener("click", async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    const interes = monto * 0.40;
-    const total = monto + interes;
-    const cuota = Math.round(total / pagos);
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert("Usuario registrado correctamente");
+  } catch (error) {
+    alert(error.message);
+  }
+});
 
-    prestamos.push({
-        nombre,
-        monto,
-        interes,
-        total,
-        cuota,
-        pagos,
-        pagados: 0,
-        intervalo,
-        tipoTexto,
-        fechaInicio
-    });
+/* ===== LOGIN ===== */
 
-    localStorage.setItem("prestamos", JSON.stringify(prestamos));
+btnLogin.addEventListener("click", async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    mostrar();
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+/* ===== LOGOUT ===== */
+
+btnLogout.addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+/* ===== DETECTAR SESIÓN ===== */
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    authContainer.classList.add("hidden");
+    appContainer.classList.remove("hidden");
+    cargarPrestamos();
+  } else {
+    currentUser = null;
+    authContainer.classList.remove("hidden");
+    appContainer.classList.add("hidden");
+  }
+});
+
+/* ===== GUARDAR PRÉSTAMO ===== */
+
+btnGuardar.addEventListener("click", async () => {
+  if (!currentUser) return;
+
+  const nombre = document.getElementById("nombre").value;
+  const monto = parseFloat(document.getElementById("monto").value);
+
+  if (!nombre || monto < 2000) {
+    alert("Datos inválidos");
+    return;
+  }
+
+  const interes = monto * 0.40;
+  const total = monto + interes;
+
+  await addDoc(collection(db, "users", currentUser.uid, "prestamos"), {
+    nombre,
+    monto,
+    total,
+    fecha: new Date()
+  });
+
+  cargarPrestamos();
+});
+
+/* ===== CARGAR PRÉSTAMOS ===== */
+
+async function cargarPrestamos() {
+  lista.innerHTML = "";
+
+  const querySnapshot = await getDocs(collection(db, "users", currentUser.uid, "prestamos"));
+
+  querySnapshot.forEach(doc => {
+    const data = doc.data();
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <p><b>${data.nombre}</b></p>
+      <p>Total: $${data.total}</p>
+      <hr>
+    `;
+    lista.appendChild(div);
+  });
 }
-
-function calcularFecha(base, intervalo, numero){
-    let fecha = new Date(base);
-
-    if(intervalo === "mensual"){
-        fecha.setMonth(fecha.getMonth() + numero);
-    } else {
-        fecha.setDate(fecha.getDate() + numero * intervalo);
-    }
-
-    return fecha;
-}
-
-function pagar(index){
-    if(prestamos[index].pagados < prestamos[index].pagos){
-        prestamos[index].pagados++;
-        localStorage.setItem("prestamos", JSON.stringify(prestamos));
-        mostrar();
-    }
-}
-
-function eliminar(index){
-    prestamos.splice(index,1);
-    localStorage.setItem("prestamos", JSON.stringify(prestamos));
-    mostrar();
-}
-
-function mostrar(){
-
-    let html = "";
-    const hoy = new Date();
-
-    prestamos.forEach((p,index)=>{
-
-        let calendario = "";
-
-        for(let i=1;i<=p.pagos;i++){
-
-            const fecha = calcularFecha(p.fechaInicio, p.intervalo, i);
-
-            let estado = "Pendiente";
-
-            if(i <= p.pagados){
-                estado = "Pagado";
-            } else if(fecha < hoy){
-                estado = "Vencido";
-            }
-
-            calendario += `
-                <div>
-                    ${i}. ${fecha.toLocaleDateString()} - ${estado}
-                </div>
-            `;
-        }
-
-        html += `
-            <div style="border:1px solid #ccc; padding:15px; margin:15px 0;">
-                <strong>${p.nombre}</strong><br>
-                Tipo: ${p.tipoTexto}<br>
-                Monto: $${p.monto}<br>
-                Interés 40%: $${p.interes}<br>
-                Total: $${p.total}<br>
-                Cuota: $${p.cuota}<br>
-                Pagados: ${p.pagados}/${p.pagos}<br><br>
-
-                ${calendario}<br>
-
-                <button onclick="pagar(${index})">Registrar Pago</button>
-                <button onclick="eliminar(${index})">Eliminar</button>
-            </div>
-        `;
-    });
-
-    document.getElementById("lista").innerHTML = html;
-}
-
-mostrar();
