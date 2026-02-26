@@ -3,14 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prueba</title>
+<title>Préstamos Mamá</title>
 
 <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
 
-<h1>Prueba de conexión</h1>
+<div class="container">
+
+<div class="card">
+<h2>Resumen General</h2>
+<div id="dashboard"></div>
+</div>
+
+<div class="card">
+<h2>Nuevo Préstamo</h2>
+
+<input type="text" id="nombre" placeholder="Nombre del cliente">
+<input type="number" id="monto" placeholder="Monto (mínimo $2000)">
+
+<select id="tipo">
+<option value="7">7 Quincenas</option>
+<option value="14">14 Semanas</option>
+</select>
+
+<button onclick="calcular()">Calcular</button>
+<div class="resultado" id="resultado"></div>
+
+</div>
+
+<div class="card">
+<h2>Préstamos</h2>
+<div id="listaPrestamos"></div>
+</div>
+
+</div>
 
 <script src="./script.js"></script>
 </body>
