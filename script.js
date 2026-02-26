@@ -4,50 +4,40 @@ function calcular() {
 
     const nombre = document.getElementById("nombre").value;
     const monto = parseFloat(document.getElementById("monto").value);
-    const pagos = parseInt(document.getElementById("tipo").value);
+    const fechaInput = document.getElementById("fechaInicio").value;
+    const tipo = document.getElementById("tipo").value.split("-");
+    const diasIntervalo = parseInt(tipo[0]);
+    const pagos = parseInt(tipo[1]);
 
-    if(!nombre){
-        alert("Escribe el nombre del cliente");
-        return;
-    }
-
-    if(monto < 2000){
-        alert("El monto mínimo es $2,000");
+    if(!nombre || monto < 2000){
+        alert("Datos inválidos");
         return;
     }
 
     const interes = monto * 0.40;
     const total = monto + interes;
     const cuota = total / pagos;
+    const fechaInicio = fechaInput ? new Date(fechaInput) : new Date();
 
     document.getElementById("resultado").innerHTML = `
-        <strong>${nombre}</strong><br><br>
+        <br>
         Total: $${total.toFixed(2)}<br>
         Cuota: $${cuota.toFixed(2)}<br><br>
-        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos})">
+        <button onclick="guardar('${nombre}', ${monto}, ${total}, ${cuota}, ${pagos}, ${diasIntervalo}, '${fechaInicio.toISOString()}')">
             Guardar Préstamo
         </button>
     `;
 }
 
-function guardar(nombre, monto, total, cuota, pagos){
-
-    prestamos.push({
-        nombre,
-        monto,
-        total,
-        cuota,
-        pagos,
-        pagados: 0
-    });
-
+function guardar(nombre, monto, total, cuota, pagos, diasIntervalo, fechaInicio){
+    prestamos.push({nombre, monto, total, cuota, pagos, pagados:0, diasIntervalo, fechaInicio});
     localStorage.setItem("prestamos", JSON.stringify(prestamos));
-
-    document.getElementById("resultado").innerHTML = "";
-    document.getElementById("nombre").value = "";
-    document.getElementById("monto").value = "";
-
     actualizarTodo();
+}
+
+function toggleCalendario(index){
+    const el = document.getElementById("cal-"+index);
+    el.style.display = el.style.display === "none" ? "block" : "none";
 }
 
 function pagar(index){
@@ -59,65 +49,61 @@ function pagar(index){
 }
 
 function eliminar(index){
-    if(confirm("¿Eliminar este préstamo?")){
-        prestamos.splice(index, 1);
+    if(confirm("¿Eliminar préstamo?")){
+        prestamos.splice(index,1);
         localStorage.setItem("prestamos", JSON.stringify(prestamos));
         actualizarTodo();
     }
 }
 
-function actualizarTodo(){
-    mostrarPrestamos();
-    actualizarDashboard();
-}
-
 function mostrarPrestamos(){
+    let html="";
+    const hoy = new Date();
 
-    let html = "";
+    prestamos.forEach((p,index)=>{
+        const fechaInicio = new Date(p.fechaInicio);
+        let clase="normal";
 
-    prestamos.forEach((p, index) => {
+        const proximo = new Date(fechaInicio);
+        proximo.setDate(fechaInicio.getDate() + (p.pagados+1)*p.diasIntervalo);
 
-        const progreso = (p.pagados / p.pagos) * 100;
-        const restante = p.total - (p.cuota * p.pagados);
+        if(hoy > proximo && p.pagados < p.pagos) clase="atrasado";
+        else if((proximo-hoy)/(1000*60*60*24)<=3 && p.pagados<p.pagos) clase="proximo";
 
-        html += `
-        <div class="prestamo-card">
-            <strong>${p.nombre}</strong><br>
-            Total: $${p.total.toFixed(2)}<br>
-            Pagados: ${p.pagados}/${p.pagos}<br>
-            Restante: $${restante.toFixed(2)}
+        let calendario="";
+        for(let i=1;i<=p.pagos;i++){
+            let fecha=new Date(fechaInicio);
+            fecha.setDate(fechaInicio.getDate()+i*p.diasIntervalo);
+            calendario+=`${i}. ${fecha.toLocaleDateString()} - ${i<=p.pagados?"Pagado":"Pendiente"}<br>`;
+        }
 
-            <div class="progress-bar">
-                <div class="progress" style="width:${progreso}%"></div>
-            </div>
+        html+=`
+        <div class="prestamo-card ${clase}">
+        <strong>${p.nombre}</strong><br>
+        Total: $${p.total.toFixed(2)}<br>
+        Pagados: ${p.pagados}/${p.pagos}<br>
 
-            ${p.pagados < p.pagos 
-                ? `<button onclick="pagar(${index})">Registrar Pago</button>` 
-                : `<button class="disabled-btn" disabled>Completado</button>`
-            }
+        <button class="btn-toggle" onclick="toggleCalendario(${index})">Ver Calendario</button>
+        <div id="cal-${index}" class="calendario">${calendario}</div>
 
-            <button class="delete-btn" onclick="eliminar(${index})">Eliminar</button>
+        <button class="btn-pago" onclick="pagar(${index})">Registrar Pago</button>
+        <button class="btn-eliminar" onclick="eliminar(${index})">Eliminar</button>
         </div>
         `;
     });
 
-    document.getElementById("listaPrestamos").innerHTML = html;
+    document.getElementById("listaPrestamos").innerHTML=html;
 }
 
 function actualizarDashboard(){
+    let totalPrestado=0;
+    prestamos.forEach(p=> totalPrestado+=p.monto);
+    document.getElementById("dashboard").innerHTML=`💵 Total Prestado: $${totalPrestado.toFixed(2)}`;
+}
 
-    let totalPrestado = 0;
-    let totalRestante = 0;
-
-    prestamos.forEach(p => {
-        totalPrestado += p.monto;
-        totalRestante += p.total - (p.cuota * p.pagados);
-    });
-
-    document.getElementById("dashboard").innerHTML = `
-        💵 Total Prestado: $${totalPrestado.toFixed(2)}<br>
-        📥 Total por Cobrar: $${totalRestante.toFixed(2)}
-    `;
+function actualizarTodo(){
+    mostrarPrestamos();
+    actualizarDashboard();
 }
 
 actualizarTodo();
