@@ -42,8 +42,6 @@ input:focus, select:focus {
     box-shadow: 0 0 8px rgba(255, 111, 145, 0.4);
 }
 
-/* BOTONES */
-
 button {
     width: 100%;
     padding: 14px;
@@ -60,31 +58,25 @@ button:hover {
     transform: scale(1.03);
 }
 
-/* Botón principal rosa coral */
 .btn-calcular {
     background: linear-gradient(135deg, #ff6f91, #ff9671);
     color: white;
 }
 
-/* Verde brillante */
 .btn-pago {
     background: linear-gradient(135deg, #00c853, #69f0ae);
     color: white;
 }
 
-/* Rojo intenso */
 .btn-eliminar {
     background: linear-gradient(135deg, #ff1744, #ff616f);
     color: white;
 }
 
-/* Amarillo dorado */
 .btn-toggle {
     background: linear-gradient(135deg, #ffc107, #ffd54f);
     color: black;
 }
-
-/* TARJETAS DE PRÉSTAMOS */
 
 .prestamo-card {
     background: #fff0f8;
@@ -94,8 +86,6 @@ button:hover {
     box-shadow: 0 6px 14px rgba(0,0,0,0.08);
     border: 2px solid #ffd6ec;
 }
-
-/* Estados */
 
 .atrasado {
     border-left: 8px solid #ff1744;
@@ -110,8 +100,6 @@ button:hover {
 .normal {
     border-left: 8px solid #00c853;
 }
-
-/* Calendario desplegable */
 
 .calendario {
     margin-top: 12px;
