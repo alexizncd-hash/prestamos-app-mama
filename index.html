@@ -36,4 +36,26 @@
 
 <script src="script.js"></script>
 </body>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAr9rN6QcxhzXVmzWhL72mo9Wp9hy80Nwo",
+    authDomain: "prestamos-mama.firebaseapp.com",
+    projectId: "prestamos-mama",
+    storageBucket: "prestamos-mama.appspot.com",
+    messagingSenderId: "983642333442",
+    appId: "1:983642333442:web:bec1d7f198dca61",
+    measurementId: "G-P8MT5E2NCK"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  window.auth = auth;
+  window.db = db;
+</script>
 </html>
