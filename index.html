@@ -22,8 +22,30 @@
 
   <!-- DASHBOARD -->
   <section id="dashboardSection" style="display:none;">
+
     <h2>Sistema de Préstamos</h2>
     <button id="btnLogout">Cerrar Sesión</button>
+
+    <hr>
+
+    <h3>Nuevo Préstamo</h3>
+
+    <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
+    <input type="number" id="monto" placeholder="Monto (ej: 4000)">
+    <input type="number" id="interes" value="40" placeholder="Interés %">
+
+    <select id="tipoPago">
+      <option value="quincenal">7 Quincenas</option>
+      <option value="semanal">14 Semanas</option>
+    </select>
+
+    <button id="btnCrearPrestamo">Crear Préstamo</button>
+
+    <hr>
+
+    <h3>Mis Préstamos</h3>
+    <div id="listaPrestamos"></div>
+
   </section>
 
   <script type="module" src="./js/app.js"></script>
