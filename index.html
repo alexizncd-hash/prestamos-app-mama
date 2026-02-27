@@ -1,76 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Préstamos App Mamá</title>
-  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
 
-  <!-- AUTH SECTION -->
-  <section id="authSection" class="view active">
-    <div class="card auth-card">
-      <h1>Acceso</h1>
+  <!-- AUTH -->
+  <section id="authSection">
+    <h2>Acceso</h2>
 
-      <input type="email" id="email" placeholder="Correo electrónico" />
-      <input type="password" id="password" placeholder="Contraseña" />
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <input type="password" id="password" placeholder="Contraseña">
 
-      <button id="btnLogin">Iniciar Sesión</button>
-      <button id="btnRegister" class="secondary">Registrarse</button>
+    <button id="btnLogin">Iniciar Sesión</button>
+    <button id="btnRegister">Registrarse</button>
 
-      <p id="authError" class="error"></p>
-    </div>
+    <p id="authError" style="color:red;"></p>
   </section>
 
-  <!-- DASHBOARD SECTION -->
-  <section id="dashboardSection" class="view hidden">
-    
-    <header class="dashboard-header">
-      <h1>Sistema de Préstamos</h1>
-      <button id="btnLogout" class="danger">Cerrar Sesión</button>
-    </header>
-
-    <!-- RESUMEN GENERAL -->
-    <div class="summary">
-      <div class="summary-card">
-        <h3>Total Prestado</h3>
-        <p id="totalPrestado">$0</p>
-      </div>
-
-      <div class="summary-card">
-        <h3>Total Recuperado</h3>
-        <p id="totalRecuperado">$0</p>
-      </div>
-
-      <div class="summary-card">
-        <h3>Ganancia</h3>
-        <p id="totalGanancia">$0</p>
-      </div>
-    </div>
-
-    <!-- CREAR PRÉSTAMO -->
-    <div class="card form-card">
-      <h2>Nuevo Préstamo</h2>
-
-      <input type="text" id="clienteNombre" placeholder="Nombre del cliente" />
-      <input type="number" id="monto" placeholder="Monto (ej: 3000, 4000)" />
-      <input type="date" id="fechaInicio" />
-
-      <button id="btnCrearPrestamo">Crear Préstamo</button>
-    </div>
-
-    <!-- BUSCADOR -->
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="Buscar cliente..." />
-    </div>
-
-    <!-- LISTA DE PRÉSTAMOS -->
-    <div id="listaPrestamos" class="loan-list"></div>
-
+  <!-- DASHBOARD -->
+  <section id="dashboardSection" style="display:none;">
+    <h2>Sistema de Préstamos</h2>
+    <button id="btnLogout">Cerrar Sesión</button>
   </section>
 
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
