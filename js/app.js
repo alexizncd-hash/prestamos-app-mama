@@ -1,3 +1,4 @@
+console.log("APP JS CARGADO");
 // js/app.js
 
 import { register, login, logout, observeAuth } from "./authService.js";
